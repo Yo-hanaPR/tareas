@@ -25,14 +25,13 @@ app.use(cors());
         completada: Boolean
     });
 
-    //supuestamente asigna ID'S autoincrementables
+    //Hace un middleware para la peticion SAVE supuestamente asigna ID'S autoincrementables
     tareaSchema.pre('save', function (next) {
         if (!this.id) {
             // Encuentra el valor máximo actual de ID y aumenta uno
             Tarea.findOne().sort().then(doc => {
                 const maxId = doc ? doc.id : 0;
                 this.id = maxId + 1;
-                console.log("ENTRA AL MIDDLEWARE=?"+maxId);
                 next();
             }).catch(err => {
                 next(err);
@@ -47,7 +46,7 @@ app.use(cors());
 
 app.get('/api/tarea', async (req,res)=>{
     try{
-        const tareas= await Tarea.find();
+        const tareas= await Tarea.find().sort({ _id: -1 });
         res.json(tareas);
     }
     catch(err){
@@ -56,8 +55,6 @@ app.get('/api/tarea', async (req,res)=>{
 });
 app.post('/api/crearTarea', async(req,res)=>{
     try{
-        console.log("Esta es la tarea que se esta creando: ")
-        console.log(req.body);
         const nuevaTarea= req.body;
         const tareaCreada= new Tarea(nuevaTarea)
         await tareaCreada.save();
@@ -97,6 +94,22 @@ app.delete('/api/eliminarTarea/:id', async(req, res)=>{
         res.status(500).json({ message: 'BACKEND: Error al eliminar la tarea' });
     }
 });
+
+app.put('/api/editarTarea/:id', async (req, res) => {
+    try {
+      const tareaActualizada = await Tarea.findByIdAndUpdate(
+        req.params.id,
+        {
+          titulo: req.body.texto,
+          descripcion: req.body.descripcion
+        },
+        { new: true }
+      );
+      res.status(200).json(tareaActualizada);
+    } catch (err) {
+      res.status(500).json({ message: 'Error al actualizar la tarea' });
+    }
+  });
 
 
 app.listen(PORT, ()=> console.log(`App is running on port ${PORT}`))

@@ -16,6 +16,12 @@
     font-size:20px;
     overflow-wrap: anywhere;
 }
+
+.tarea-input-edit{
+    height:20px;
+    border-radius: 5px;
+    display: block;
+}
 .tarea-icono{
     width:25px;
     height:25px;

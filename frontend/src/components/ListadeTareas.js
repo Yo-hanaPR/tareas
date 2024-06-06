@@ -17,8 +17,7 @@ function ListadeTareas(){
         }
         const Tareas= await responseTareas.json();
         setTareas(Tareas);
-        console.log("TAREAS: "+ JSON.stringify(Tareas));
-      }catch{
+       }catch{
         console.log("Error al obtener las tareas");
   
       }
@@ -31,11 +30,10 @@ function ListadeTareas(){
 
     const AgregarTarea= tarea => {
         if(tarea.texto.trim()){
-            console.log("Probando..");
             tarea.texto= tarea.texto.trim();
             const nuevoDocumento= {
                 titulo: tarea.texto,
-                descripcion: "PROBANDO",
+                descripcion: tarea.descripcion,
                 completada: false
             }
 
@@ -55,10 +53,9 @@ function ListadeTareas(){
 
 
                   const tareaCreada = await creatTarea.json();
-                  console.log("Esta es la tarea creada: "+tareaCreada);
-
+                  
                 // Actualiza el estado del frontend inmediatamente
-                setTareas(Tareas => [...Tareas, tareaCreada]);
+                setTareas(Tareas => [tareaCreada, ...Tareas ]);
 
 
                 }catch{
@@ -69,14 +66,12 @@ function ListadeTareas(){
         }
     };
     const eliminarTarea = async (id) => {
-console.log("FRONT: ID DEcxvcvxcv LA TAREA: "+id)
         try {
             const response = await fetch(`http://localhost:5000/api/eliminarTarea/${id}`, {
                 method: 'delete'
             });
     
-            console.log("TAREAS: "+ JSON.stringify(Tareas));
-            if (!response.ok) {
+             if (!response.ok) {
                 throw new Error('FRONTEND: ERROR AL ELIMINAR');
             }
     
@@ -122,22 +117,33 @@ console.log("FRONT: ID DEcxvcvxcv LA TAREA: "+id)
     tacharTarea();
     };
 
+    const actualizarTarea = (id, nuevoTexto, nuevaDescripcion) => {
+      setTareas((Tareas) =>
+        Tareas.map((tarea) =>
+          tarea._id === id
+            ? { ...tarea, titulo: nuevoTexto, descripcion: nuevaDescripcion }
+            : tarea
+        )
+      );
+    };
+
     return (
         <>
             <TareaFormulario onSubmit={AgregarTarea} />
             <div className='tareas-lista-contenedor'>
                 {
                     Tareas.map(
-
                         tarea => (
                             <Tarea
-                                key={tarea.id}
-                                id={tarea.id}
+                                key={tarea._id}
+                                id={tarea._id}
                                 texto={tarea.titulo}
                                 descripcion={tarea.descripcion}
                                 completada={tarea.completada}
                                 eliminarTarea={() => eliminarTarea(tarea._id)}
                                 completarTarea={() => completarTarea(tarea._id)}
+                                actualizarTarea={actualizarTarea}
+                                
                             />
                         )
                     )
